@@ -16,6 +16,28 @@ type Props = NativeStackScreenProps<RootStackParamList, 'EmailAuth'>;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Maps a Firebase auth error to a translation key, falling back to `fallback`.
+ *
+ * Sign-in failures deliberately have no case here. The project has email
+ * enumeration protection enabled, so a missing account and a wrong password
+ * both surface as `auth/invalid-credential` — indistinguishable by design, to
+ * stop the screen being used to discover which addresses are registered. The
+ * sign-in fallback therefore names both possibilities rather than guessing.
+ */
+function authErrorKey(e: unknown, fallback: string): string {
+  switch ((e as { code?: string }).code) {
+    case 'auth/email-already-in-use':
+      return 'login.emailInUse';
+    case 'auth/network-request-failed':
+      return 'login.networkError';
+    case 'auth/too-many-requests':
+      return 'login.tooManyAttempts';
+    default:
+      return fallback;
+  }
+}
+
 export function EmailAuthScreen(_props: Props) {
   const { t } = useTranslation();
   const setUser = useSessionStore((s) => s.setUser);
@@ -57,7 +79,8 @@ export function EmailAuthScreen(_props: Props) {
           : await signUpWithEmail(email.trim(), password);
       setUser(user);
     } catch (e) {
-      Alert.alert(t('common.error'), t('login.authFailed'));
+      const fallback = mode === 'signIn' ? 'login.signInFailed' : 'login.signUpFailed';
+      Alert.alert(t('common.error'), t(authErrorKey(e, fallback)));
     } finally {
       setLoading(false);
     }
@@ -75,7 +98,7 @@ export function EmailAuthScreen(_props: Props) {
       await sendPasswordReset(email.trim());
       Alert.alert(t('login.resetSentTitle'), t('login.resetSent'));
     } catch (e) {
-      Alert.alert(t('common.error'), t('login.resetFailed'));
+      Alert.alert(t('common.error'), t(authErrorKey(e, 'login.resetFailed')));
     } finally {
       setResetting(false);
     }

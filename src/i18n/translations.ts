@@ -32,7 +32,12 @@ export const translations = {
       guest: 'Continue as Guest',
       invalidEmail: 'Please enter a valid email address.',
       invalidPassword: 'Password must be at least 6 characters.',
-      authFailed: 'Authentication failed. Please check your details and try again.',
+      signInFailed:
+        "Incorrect email or password. If you haven't created an account yet, tap 'Sign up' below.",
+      signUpFailed: "Couldn't create your account. Please check your details and try again.",
+      emailInUse: "An account already exists for this email. Tap 'Sign in' below to log in instead.",
+      networkError: 'No internet connection. Please check your network and try again.',
+      tooManyAttempts: 'Too many attempts. Please wait a few minutes before trying again.',
       firebaseNotConfigured:
         'Email sign-in is not configured yet. Add your Firebase project credentials, or continue as a guest.',
       forgotPassword: 'Forgot password?',
@@ -224,7 +229,12 @@ export const translations = {
       guest: 'المتابعة كضيف',
       invalidEmail: 'يرجى إدخال بريد إلكتروني صحيح.',
       invalidPassword: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.',
-      authFailed: 'فشلت عملية المصادقة. يرجى التحقق من البيانات والمحاولة مرة أخرى.',
+      signInFailed:
+        'البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا لم تُنشئ حساباً بعد، اضغط على "إنشاء حساب" أدناه.',
+      signUpFailed: 'تعذّر إنشاء الحساب. يرجى التحقق من البيانات والمحاولة مرة أخرى.',
+      emailInUse: 'يوجد حساب بهذا البريد الإلكتروني بالفعل. اضغط على "تسجيل الدخول" أدناه للدخول إليه.',
+      networkError: 'لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.',
+      tooManyAttempts: 'محاولات كثيرة جداً. يرجى الانتظار بضع دقائق قبل المحاولة مرة أخرى.',
       firebaseNotConfigured:
         'تسجيل الدخول بالبريد الإلكتروني غير مُفعّل بعد. أضف بيانات مشروع Firebase، أو تابع كضيف.',
       forgotPassword: 'نسيت كلمة المرور؟',
