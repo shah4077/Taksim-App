@@ -13,6 +13,10 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+
+# Build artifacts (tens of MB; download from EAS instead of committing)
+*.aab
+*.apk
 *.p8
 *.p12
 *.key
