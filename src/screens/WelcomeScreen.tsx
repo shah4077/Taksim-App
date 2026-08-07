@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
@@ -8,6 +8,14 @@ import { useSessionStore } from '../state/useSessionStore';
 import { createGuestUser } from '../services/authService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
+
+/**
+ * Published from docs/ via GitHub Pages. Google Play requires a reachable
+ * privacy policy URL, and the consent line below promises both documents, so
+ * these must stay live for as long as the app is listed.
+ */
+const TERMS_URL = 'https://shah4077.github.io/Taksim-App/terms.html';
+const PRIVACY_URL = 'https://shah4077.github.io/Taksim-App/privacy.html';
 
 /**
  * Colors and type scale for this screen are lifted directly from the
@@ -43,8 +51,12 @@ export function WelcomeScreen({ navigation }: Props) {
     setUser(createGuestUser());
   }
 
-  function handleLegalLink() {
-    Alert.alert(t('common.ok'), t('welcome.legalComingSoon'));
+  async function openLegalLink(url: string) {
+    try {
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert(t('common.error'), t('welcome.legalUnavailable'));
+    }
   }
 
   return (
@@ -79,11 +91,11 @@ export function WelcomeScreen({ navigation }: Props) {
 
         <Text style={[styles.legal, { fontFamily: fontFor(language, 'regular') }]}>
           {t('welcome.legalPrefix')}{' '}
-          <Text style={styles.legalLink} onPress={handleLegalLink}>
+          <Text style={styles.legalLink} onPress={() => openLegalLink(TERMS_URL)}>
             {t('welcome.terms')}
           </Text>{' '}
           {t('welcome.legalAnd')}{' '}
-          <Text style={styles.legalLink} onPress={handleLegalLink}>
+          <Text style={styles.legalLink} onPress={() => openLegalLink(PRIVACY_URL)}>
             {t('welcome.privacy')}
           </Text>
           .

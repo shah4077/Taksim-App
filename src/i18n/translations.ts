@@ -43,7 +43,7 @@ export const translations = {
       terms: 'Terms of Service',
       legalAnd: 'and',
       privacy: 'Privacy Policy',
-      legalComingSoon: "This document isn't published yet.",
+      legalUnavailable: "Couldn't open the link. Please check your connection and try again.",
     },
     home: {
       title: 'What are you splitting today?',
@@ -229,7 +229,7 @@ export const translations = {
       terms: 'شروط الخدمة',
       legalAnd: 'و',
       privacy: 'سياسة الخصوصية',
-      legalComingSoon: 'هذه الوثيقة غير منشورة بعد.',
+      legalUnavailable: 'تعذّر فتح الرابط. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
     },
     home: {
       title: 'ماذا تريد أن تقسم اليوم؟',
