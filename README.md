@@ -20,18 +20,28 @@ npx expo start
 ```
 
 - Press `a` to open on a connected Android device/emulator (or scan the QR code with **Expo Go**).
-- Guest login works immediately. Email login requires Firebase setup (below).
+- Both guest and email login work out of the box.
 
-## Configuring email authentication (optional)
+## Email authentication
 
-Guest login requires zero configuration. To enable **email sign-up/sign-in**:
+Email sign-up/sign-in is wired to the `taksim-app-bca6e` Firebase project, with its
+**Web** app config committed in `src/services/firebase.ts`. Those values are not
+secrets — a Firebase web API key is meant to ship inside client bundles, and access is
+governed by security rules and by which providers are enabled in the console.
+
+To point the app at a different Firebase project:
 
 1. Create a free project at the [Firebase console](https://console.firebase.google.com).
 2. In **Authentication → Sign-in method**, enable **Email/Password**.
-3. In **Project settings → General**, add a Web app and copy its config values.
-4. Paste them into `src/services/firebase.ts`, replacing the `YOUR_...` placeholders.
+3. In **Project settings → General → Your apps**, add a **Web** app (the `</>` icon —
+   *not* Android, which yields a `google-services.json` this JS-SDK setup cannot use).
+4. Replace the `firebaseConfig` object in `src/services/firebase.ts` with its values.
 
-Until this is done, tapping "Sign In"/"Create Account" shows a friendly message directing the user to continue as a guest instead — the app is fully usable without it.
+If the config is ever stripped, `isFirebaseConfigured` turns off the email paths and the
+app tells the user to continue as a guest instead, so it stays usable either way.
+
+Firebase Analytics is deliberately not installed — `docs/privacy.html` states that the
+app runs no analytics.
 
 ## Project structure
 

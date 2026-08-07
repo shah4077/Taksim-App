@@ -9,22 +9,27 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 /**
- * These values are placeholders. Create a free Firebase project at
- * https://console.firebase.google.com, enable Authentication ->
- * Sign-in method -> Email/Password and Anonymous, then replace the values
- * below (or supply them via app.config.js/env vars) with your project's
- * config. See README.md for full setup steps.
+ * Firebase web app config for the `taksim-app-bca6e` project. These values are
+ * not secrets: the web API key is designed to ship inside client bundles and
+ * be publicly readable. Access is controlled by Firebase security rules and by
+ * which sign-in providers are enabled in the console, not by keeping the key
+ * hidden. See README.md for the project setup steps.
+ *
+ * `measurementId` is intentionally omitted — it only applies to Firebase
+ * Analytics, which this app does not use (see docs/privacy.html, which states
+ * that Taksim runs no analytics).
  */
 const firebaseConfig = {
-  apiKey: 'YOUR_FIREBASE_API_KEY',
-  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT_ID.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: 'AIzaSyDKFS7m0syncQBaqH40phBQTQ8HjtRwArQ',
+  authDomain: 'taksim-app-bca6e.firebaseapp.com',
+  projectId: 'taksim-app-bca6e',
+  storageBucket: 'taksim-app-bca6e.firebasestorage.app',
+  messagingSenderId: '331143922750',
+  appId: '1:331143922750:web:690ee8ef9076ece743fd6f',
 };
 
-export const isFirebaseConfigured = firebaseConfig.apiKey !== 'YOUR_FIREBASE_API_KEY';
+/** Guards the email auth paths if the config above is ever stripped or reset to placeholders. */
+export const isFirebaseConfigured = !firebaseConfig.apiKey.startsWith('YOUR_');
 
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
