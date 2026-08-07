@@ -1,22 +1,39 @@
 import React, { useState } from 'react';
-import { Alert, FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
 import { Screen } from '../../components/Screen';
 import { Card } from '../../components/Card';
-import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
 import { FormSheet } from '../../components/FormSheet';
+import { DashedAddCard } from '../../components/DashedAddCard';
+import { Badge, type BadgeTone } from '../../components/Badge';
+import { PageTitle } from '../../components/PageTitle';
+import { AppText } from '../../components/AppText';
 import { EmptyState } from '../../components/EmptyState';
 import { useTranslation } from '../../i18n/useTranslation';
 import { colors } from '../../theme/colors';
+import { radii } from '../../theme/typography';
 import { useGatheringStore, MAX_GATHERINGS, type Gathering } from '../../state/useGatheringStore';
 import { useFamilyStore } from '../../state/useFamilyStore';
-import { formatDateDisplay, fromDateKey, toDateKey } from '../../utils/date';
+import { formatDateDisplay, fromDateKey, getDateStatus, toDateKey, type DateStatus } from '../../utils/date';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GatheringList'>;
+
+const CARD_THEMES: { bg: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { bg: colors.primary, icon: 'calendar' },
+  { bg: colors.accent, icon: 'cafe' },
+  { bg: colors.secondary, icon: 'sparkles' },
+];
+
+const STATUS_STYLES: Record<DateStatus, BadgeTone> = {
+  thisWeek: 'mint',
+  upcoming: 'blue',
+  planning: 'neutral',
+  past: 'neutral',
+};
 
 export function GatheringListScreen({ navigation }: Props) {
   const { t, language } = useTranslation();
@@ -91,10 +108,13 @@ export function GatheringListScreen({ navigation }: Props) {
       <FlatList
         data={gatherings}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={<PageTitle title={t('gatherings.title')} subtitle={t('gatherings.subtitle')} />}
         ListEmptyComponent={<EmptyState message={t('gatherings.emptyState')} />}
         contentContainerStyle={gatherings.length === 0 && styles.flexGrow}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const familyCount = familiesByGathering[item.id]?.length ?? 0;
+          const theme = CARD_THEMES[index % CARD_THEMES.length];
+          const status = getDateStatus(item.date);
           return (
             <Pressable
               onPress={() =>
@@ -102,32 +122,54 @@ export function GatheringListScreen({ navigation }: Props) {
               }
             >
               <Card style={styles.card}>
-                <View style={styles.row}>
-                  <View style={styles.flex1}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <Text style={styles.meta}>
-                      {item.date ? formatDateDisplay(item.date, language) : t('gatherings.noDate')} ·{' '}
-                      {t('gatherings.familiesCount', { count: familyCount })}
-                    </Text>
+                <View style={styles.topRow}>
+                  <View style={[styles.iconCircle, { backgroundColor: theme.bg }]}>
+                    <Ionicons name={theme.icon} size={20} color="#FFFFFF" />
                   </View>
-                  <Pressable onPress={() => handleRemove(item)} hitSlop={10} style={styles.deleteIcon}>
-                    <Ionicons name="trash-outline" size={22} color={colors.danger} />
-                  </Pressable>
+                  <View style={styles.topRowRight}>
+                    <Badge label={t(`common.status${capitalize(status)}`)} tone={STATUS_STYLES[status]} />
+                    <Pressable onPress={() => handleRemove(item)} hitSlop={10} style={styles.deleteIcon}>
+                      <Ionicons name="trash-outline" size={18} color={colors.textMuted} />
+                    </Pressable>
+                  </View>
+                </View>
+
+                <AppText weight="bold" style={styles.name}>
+                  {item.name}
+                </AppText>
+
+                <View style={styles.dateRow}>
+                  <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
+                  <AppText style={styles.dateText}>
+                    {item.date ? formatDateDisplay(item.date, language) : t('gatherings.noDate')}
+                  </AppText>
+                </View>
+
+                <View style={styles.divider} />
+
+                <View style={styles.bottomRow}>
+                  <AppText weight="semiBold" style={styles.countText}>
+                    {t('gatherings.familiesCount', { count: familyCount })}
+                  </AppText>
                 </View>
               </Card>
             </Pressable>
           );
         }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
-
-      {!canAdd && <Text style={styles.maxNotice}>{t('gatherings.maxReached', { max: MAX_GATHERINGS })}</Text>}
-
-      <Button
-        label={t('gatherings.addGathering')}
-        onPress={openAddSheet}
-        disabled={!canAdd}
-        style={styles.addButton}
+        ListFooterComponent={
+          <View style={gatherings.length > 0 && styles.footerSpacing}>
+            <DashedAddCard
+              title={t('gatherings.addGathering')}
+              subtitle={t('gatherings.addSubtitle')}
+              onPress={openAddSheet}
+              disabled={!canAdd}
+            />
+            {!canAdd && (
+              <AppText style={styles.maxNotice}>{t('gatherings.maxReached', { max: MAX_GATHERINGS })}</AppText>
+            )}
+          </View>
+        }
       />
 
       <FormSheet
@@ -140,11 +182,13 @@ export function GatheringListScreen({ navigation }: Props) {
       >
         <TextField label={t('gatherings.name')} value={name} onChangeText={setName} error={error} />
 
-        <Text style={styles.fieldLabel}>{t('gatherings.date')}</Text>
+        <AppText weight="semiBold" style={styles.fieldLabel}>
+          {t('gatherings.date')}
+        </AppText>
         <Pressable style={styles.dateInput} onPress={handleOpenDatePicker}>
-          <Text style={dateKey ? styles.dateText : styles.datePlaceholder}>
+          <AppText style={dateKey ? styles.dateInputText : styles.datePlaceholder}>
             {dateKey ? formatDateDisplay(dateKey, language) : t('gatherings.datePlaceholder')}
-          </Text>
+          </AppText>
           {dateKey ? (
             <Pressable
               onPress={(e) => {
@@ -176,44 +220,77 @@ export function GatheringListScreen({ navigation }: Props) {
   );
 }
 
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 const styles = StyleSheet.create({
   flexGrow: { flexGrow: 1 },
   card: {
-    padding: 14,
+    padding: 16,
   },
-  row: {
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  topRowRight: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  flex1: { flex: 1 },
-  name: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  meta: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
+    gap: 8,
   },
   deleteIcon: {
-    marginStart: 8,
+    padding: 2,
+  },
+  iconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  name: {
+    fontSize: 18,
+    color: colors.text,
+    marginBottom: 6,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dateText: {
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 12,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  countText: {
+    fontSize: 13,
+    color: colors.text,
   },
   separator: {
     height: 12,
+  },
+  footerSpacing: {
+    marginTop: 4,
   },
   maxNotice: {
     color: colors.warning,
     fontSize: 13,
     textAlign: 'center',
-    marginTop: 8,
-  },
-  addButton: {
-    marginTop: 16,
+    marginTop: 12,
   },
   fieldLabel: {
     fontSize: 14,
-    fontWeight: '600',
     color: colors.text,
     marginBottom: 8,
   },
@@ -223,13 +300,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: radii.md,
     paddingHorizontal: 14,
     paddingVertical: 12,
     backgroundColor: colors.surface,
     marginBottom: 16,
   },
-  dateText: {
+  dateInputText: {
     fontSize: 16,
     color: colors.text,
   },

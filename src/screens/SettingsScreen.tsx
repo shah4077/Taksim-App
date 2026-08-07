@@ -1,12 +1,15 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { Screen } from '../components/Screen';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { PageTitle } from '../components/PageTitle';
+import { AppText } from '../components/AppText';
 import { useTranslation } from '../i18n/useTranslation';
 import { colors } from '../theme/colors';
+import { radii } from '../theme/typography';
 import { useSessionStore, type CurrencyCode } from '../state/useSessionStore';
 import type { AppLanguage } from '../i18n';
 import { applyLanguage } from '../i18n/applyLanguage';
@@ -37,7 +40,11 @@ export function SettingsScreen(_props: Props) {
 
   return (
     <Screen scroll>
-      <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
+      <PageTitle title={t('settings.title')} />
+
+      <AppText weight="bold" style={styles.sectionTitle}>
+        {t('settings.language')}
+      </AppText>
       <Card style={styles.card}>
         <Row
           label={t('settings.english')}
@@ -51,21 +58,31 @@ export function SettingsScreen(_props: Props) {
         />
       </Card>
 
-      <Text style={styles.sectionTitle}>{t('settings.currencyLabel')}</Text>
+      <AppText weight="bold" style={styles.sectionTitle}>
+        {t('settings.currencyLabel')}
+      </AppText>
       <Card style={styles.card}>
         {CURRENCIES.map((c) => (
           <Row key={c} label={c} selected={currency === c} onPress={() => setCurrency(c)} />
         ))}
       </Card>
 
-      <Text style={styles.sectionTitle}>{t('settings.account')}</Text>
+      <AppText weight="bold" style={styles.sectionTitle}>
+        {t('settings.account')}
+      </AppText>
       <Card style={styles.card}>
-        <Text style={styles.accountText}>
+        <AppText style={styles.accountText}>
           {user?.mode === 'email' ? user.email : t('settings.guestAccount')}
-        </Text>
+        </AppText>
       </Card>
 
-      <Button label={t('common.logout')} onPress={handleLogout} variant="danger" style={styles.logout} />
+      <Button
+        label={t('common.logout')}
+        onPress={handleLogout}
+        variant="danger"
+        icon="log-out-outline"
+        style={styles.logout}
+      />
     </Screen>
   );
 }
@@ -73,7 +90,9 @@ export function SettingsScreen(_props: Props) {
 function Row({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
     <Pressable style={styles.row} onPress={onPress}>
-      <Text style={styles.rowLabel}>{label}</Text>
+      <AppText weight="medium" style={styles.rowLabel}>
+        {label}
+      </AppText>
       <View style={[styles.radio, selected && styles.radioSelected]} />
     </Pressable>
   );
@@ -82,9 +101,9 @@ function Row({ label, selected, onPress }: { label: string; selected: boolean; o
 const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
-    fontWeight: '700',
     color: colors.textMuted,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 8,
     marginTop: 20,
   },
@@ -105,7 +124,7 @@ const styles = StyleSheet.create({
   radio: {
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: radii.pill,
     borderWidth: 2,
     borderColor: colors.border,
   },

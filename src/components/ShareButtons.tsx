@@ -1,7 +1,6 @@
 import React from 'react';
-import { Alert, Linking, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, StyleSheet, View } from 'react-native';
 import { Button } from './Button';
-import { colors } from '../theme/colors';
 import { useTranslation } from '../i18n/useTranslation';
 
 interface ShareButtonsProps {
@@ -42,16 +41,14 @@ export function ShareButtons({ message, subject }: ShareButtonsProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('share.title')}</Text>
-      <View style={styles.row}>
-        <Button
-          label={t('share.whatsapp')}
-          onPress={shareToWhatsApp}
-          variant="outline"
-          style={styles.button}
-        />
-        <Button label={t('share.gmail')} onPress={shareToGmail} variant="outline" style={styles.button} />
-      </View>
+      <Button label={t('share.whatsapp')} onPress={shareToWhatsApp} icon="logo-whatsapp" style={styles.button} />
+      <Button
+        label={t('share.gmail')}
+        onPress={shareToGmail}
+        variant="outline"
+        icon="mail-outline"
+        style={styles.button}
+      />
     </View>
   );
 }
@@ -60,19 +57,9 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     marginBottom: 12,
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-  row: {
-    flexDirection: 'row',
     gap: 12,
   },
   button: {
-    flex: 1,
+    width: '100%',
   },
 });

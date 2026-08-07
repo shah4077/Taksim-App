@@ -1,9 +1,13 @@
 import React, { useMemo } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
 import { Screen } from '../../components/Screen';
 import { Card } from '../../components/Card';
+import { InitialsAvatar } from '../../components/InitialsAvatar';
+import { PageTitle } from '../../components/PageTitle';
+import { AppText } from '../../components/AppText';
 import { EmptyState } from '../../components/EmptyState';
 import { ShareButtons } from '../../components/ShareButtons';
 import { useTranslation } from '../../i18n/useTranslation';
@@ -60,18 +64,30 @@ export function FriendsBalancesScreen({ route }: Props) {
       <FlatList
         data={balances}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={<Text style={styles.sectionTitle}>{t('balances.netBalances')}</Text>}
-        renderItem={({ item }) => (
+        ListHeaderComponent={
+          <>
+            <PageTitle title={t('balances.title')} titleColor={colors.primary} align="center" />
+            <AppText weight="bold" style={styles.sectionTitle}>
+              {t('balances.netBalances')}
+            </AppText>
+          </>
+        }
+        renderItem={({ item, index }) => (
           <Card style={styles.balanceCard}>
             <View style={styles.balanceRow}>
-              <Text style={styles.name}>{item.name}</Text>
+              <InitialsAvatar name={item.name} index={index} size={36} />
+              <AppText weight="bold" style={styles.flex1}>
+                {item.name}
+              </AppText>
               {Math.abs(item.balance) < 0.01 ? (
-                <Text style={styles.settledText}>{t('family.settled')}</Text>
+                <AppText weight="bold" style={styles.settledText}>
+                  {t('family.settled')}
+                </AppText>
               ) : (
-                <Text style={item.balance > 0 ? styles.creditText : styles.debitText}>
+                <AppText weight="bold" style={item.balance > 0 ? styles.creditText : styles.debitText}>
                   {item.balance > 0 ? t('balances.isOwed') : t('balances.owes')}{' '}
                   {formatMoney(Math.abs(item.balance), currency)}
-                </Text>
+                </AppText>
               )}
             </View>
           </Card>
@@ -79,20 +95,28 @@ export function FriendsBalancesScreen({ route }: Props) {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListFooterComponent={
           <View>
-            <Text style={styles.sectionTitle}>{t('balances.settlementTitle')}</Text>
+            <AppText weight="bold" style={styles.sectionTitle}>
+              {t('balances.settlementTitle')}
+            </AppText>
             {settlements.length === 0 ? (
               <EmptyState message={t('balances.allSettled')} />
             ) : (
-              settlements.map((s) => (
+              settlements.map((s, index) => (
                 <Card key={`${s.fromId}-${s.toId}`} style={styles.settlementCard}>
-                  <Text style={styles.settlementText}>
-                    {t('balances.settlementLine', {
-                      from: s.fromName,
-                      to: s.toName,
-                      amount: formatAmount(s.amount),
-                      currency,
-                    })}
-                  </Text>
+                  <View style={styles.settlementNamesRow}>
+                    <InitialsAvatar name={s.fromName} index={index * 2} size={32} />
+                    <AppText weight="semiBold" style={styles.settlementName}>
+                      {s.fromName}
+                    </AppText>
+                    <Ionicons name="arrow-forward" size={16} color={colors.textMuted} style={styles.arrow} />
+                    <InitialsAvatar name={s.toName} index={index * 2 + 1} size={32} />
+                    <AppText weight="semiBold" style={styles.settlementName}>
+                      {s.toName}
+                    </AppText>
+                  </View>
+                  <AppText weight="extraBold" style={styles.settlementAmount}>
+                    {formatMoney(s.amount, currency)}
+                  </AppText>
                 </Card>
               ))
             )}
@@ -107,11 +131,9 @@ export function FriendsBalancesScreen({ route }: Props) {
 
 const styles = StyleSheet.create({
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    marginBottom: 10,
+    fontSize: 16,
+    color: colors.text,
+    marginBottom: 12,
     marginTop: 8,
   },
   balanceCard: {
@@ -119,36 +141,48 @@ const styles = StyleSheet.create({
   },
   balanceRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
   },
-  name: {
+  flex1: {
+    flex: 1,
     fontSize: 16,
-    fontWeight: '700',
     color: colors.text,
   },
   creditText: {
     color: colors.success,
-    fontWeight: '700',
+    fontSize: 14,
   },
   debitText: {
     color: colors.danger,
-    fontWeight: '700',
+    fontSize: 14,
   },
   settledText: {
     color: colors.textMuted,
-    fontWeight: '600',
+    fontSize: 14,
   },
   separator: {
     height: 12,
   },
   settlementCard: {
     marginBottom: 10,
-    backgroundColor: colors.secondaryLight,
   },
-  settlementText: {
-    color: colors.text,
-    fontWeight: '600',
+  settlementNamesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  arrow: {
+    marginHorizontal: 10,
+  },
+  settlementName: {
+    marginStart: 8,
     fontSize: 14,
+    color: colors.text,
+    flexShrink: 1,
+  },
+  settlementAmount: {
+    color: colors.danger,
+    fontSize: 20,
   },
 });

@@ -1,24 +1,48 @@
 import React, { useState } from 'react';
-import { Alert, FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
 import { Screen } from '../../components/Screen';
 import { Card } from '../../components/Card';
-import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
 import { FormSheet } from '../../components/FormSheet';
+import { DashedAddCard } from '../../components/DashedAddCard';
+import { Badge, type BadgeTone } from '../../components/Badge';
+import { PageTitle } from '../../components/PageTitle';
+import { AppText } from '../../components/AppText';
 import { EmptyState } from '../../components/EmptyState';
 import { useTranslation } from '../../i18n/useTranslation';
 import { colors } from '../../theme/colors';
+import { radii } from '../../theme/typography';
 import { useTripStore, MAX_TRIPS, type Trip } from '../../state/useTripStore';
 import { useFriendsStore } from '../../state/useFriendsStore';
-import { formatDateDisplay, formatDateRange, fromDateKey, toDateKey } from '../../utils/date';
+import {
+  formatDateDisplay,
+  formatDateRange,
+  fromDateKey,
+  getDateStatus,
+  toDateKey,
+  type DateStatus,
+} from '../../utils/date';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TripList'>;
 
 type ActiveField = 'start' | 'end' | null;
+
+const CARD_THEMES: { bg: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { bg: colors.secondary, icon: 'airplane' },
+  { bg: colors.accent, icon: 'restaurant' },
+  { bg: colors.primary, icon: 'trail-sign' },
+];
+
+const STATUS_STYLES: Record<DateStatus, BadgeTone> = {
+  thisWeek: 'mint',
+  upcoming: 'blue',
+  planning: 'neutral',
+  past: 'neutral',
+};
 
 export function TripListScreen({ navigation }: Props) {
   const { t, language } = useTranslation();
@@ -106,37 +130,64 @@ export function TripListScreen({ navigation }: Props) {
       <FlatList
         data={trips}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={<PageTitle title={t('trips.title')} subtitle={t('trips.subtitle')} />}
         ListEmptyComponent={<EmptyState message={t('trips.emptyState')} />}
         contentContainerStyle={trips.length === 0 && styles.flexGrow}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const participantCount = friendsByTrip[item.id]?.length ?? 0;
           const dateRange = formatDateRange(item.startDate, item.endDate, language);
+          const theme = CARD_THEMES[index % CARD_THEMES.length];
+          const status = getDateStatus(item.startDate ?? item.endDate);
           return (
             <Pressable
               onPress={() => navigation.navigate('FriendsGroup', { tripId: item.id, tripName: item.name })}
             >
               <Card style={styles.card}>
-                <View style={styles.row}>
-                  <View style={styles.flex1}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <Text style={styles.meta}>
-                      {dateRange ?? t('trips.noDates')} · {t('trips.participantsCount', { count: participantCount })}
-                    </Text>
+                <View style={styles.topRow}>
+                  <View style={[styles.iconCircle, { backgroundColor: theme.bg }]}>
+                    <Ionicons name={theme.icon} size={20} color="#FFFFFF" />
                   </View>
-                  <Pressable onPress={() => handleRemove(item)} hitSlop={10} style={styles.deleteIcon}>
-                    <Ionicons name="trash-outline" size={22} color={colors.danger} />
-                  </Pressable>
+                  <View style={styles.topRowRight}>
+                    <Badge label={t(`common.status${capitalize(status)}`)} tone={STATUS_STYLES[status]} />
+                    <Pressable onPress={() => handleRemove(item)} hitSlop={10} style={styles.deleteIcon}>
+                      <Ionicons name="trash-outline" size={18} color={colors.textMuted} />
+                    </Pressable>
+                  </View>
+                </View>
+
+                <AppText weight="bold" style={styles.name}>
+                  {item.name}
+                </AppText>
+
+                <View style={styles.dateRow}>
+                  <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
+                  <AppText style={styles.dateText}>{dateRange ?? t('trips.noDates')}</AppText>
+                </View>
+
+                <View style={styles.divider} />
+
+                <View style={styles.bottomRow}>
+                  <AppText weight="semiBold" style={styles.countText}>
+                    {t('trips.participantsCount', { count: participantCount })}
+                  </AppText>
                 </View>
               </Card>
             </Pressable>
           );
         }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListFooterComponent={
+          <View style={trips.length > 0 && styles.footerSpacing}>
+            <DashedAddCard
+              title={t('trips.addTrip')}
+              subtitle={t('trips.addSubtitle')}
+              onPress={openAddSheet}
+              disabled={!canAdd}
+            />
+            {!canAdd && <AppText style={styles.maxNotice}>{t('trips.maxReached', { max: MAX_TRIPS })}</AppText>}
+          </View>
+        }
       />
-
-      {!canAdd && <Text style={styles.maxNotice}>{t('trips.maxReached', { max: MAX_TRIPS })}</Text>}
-
-      <Button label={t('trips.addTrip')} onPress={openAddSheet} disabled={!canAdd} style={styles.addButton} />
 
       <FormSheet
         visible={sheetVisible}
@@ -191,10 +242,18 @@ export function TripListScreen({ navigation }: Props) {
             }}
           />
         )}
-        {errors.date ? <Text style={styles.errorText}>{errors.date}</Text> : null}
+        {errors.date ? (
+          <AppText weight="medium" style={styles.errorText}>
+            {errors.date}
+          </AppText>
+        ) : null}
       </FormSheet>
     </Screen>
   );
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function DateField({
@@ -214,11 +273,13 @@ function DateField({
 }) {
   return (
     <View style={styles.dateFieldWrap}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <AppText weight="semiBold" style={styles.fieldLabel}>
+        {label}
+      </AppText>
       <Pressable style={styles.dateInput} onPress={onPress}>
-        <Text style={dateKey ? styles.dateText : styles.datePlaceholder}>
+        <AppText style={dateKey ? styles.dateInputText : styles.datePlaceholder}>
           {dateKey ? formatDateDisplay(dateKey, language) : placeholder}
-        </Text>
+        </AppText>
         {dateKey ? (
           <Pressable
             onPress={(e) => {
@@ -240,44 +301,73 @@ function DateField({
 const styles = StyleSheet.create({
   flexGrow: { flexGrow: 1 },
   card: {
-    padding: 14,
+    padding: 16,
   },
-  row: {
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  topRowRight: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  flex1: { flex: 1 },
-  name: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  meta: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
+    gap: 8,
   },
   deleteIcon: {
-    marginStart: 8,
+    padding: 2,
+  },
+  iconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  name: {
+    fontSize: 18,
+    color: colors.text,
+    marginBottom: 6,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dateText: {
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 12,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  countText: {
+    fontSize: 13,
+    color: colors.text,
   },
   separator: {
     height: 12,
+  },
+  footerSpacing: {
+    marginTop: 4,
   },
   maxNotice: {
     color: colors.warning,
     fontSize: 13,
     textAlign: 'center',
-    marginTop: 8,
-  },
-  addButton: {
-    marginTop: 16,
+    marginTop: 12,
   },
   dateFieldWrap: {
     marginBottom: 4,
   },
   fieldLabel: {
     fontSize: 14,
-    fontWeight: '600',
     color: colors.text,
     marginBottom: 8,
   },
@@ -287,13 +377,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: radii.md,
     paddingHorizontal: 14,
     paddingVertical: 12,
     backgroundColor: colors.surface,
     marginBottom: 16,
   },
-  dateText: {
+  dateInputText: {
     fontSize: 16,
     color: colors.text,
   },

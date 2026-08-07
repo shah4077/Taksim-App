@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { Screen } from '../components/Screen';
 import { TextField } from '../components/TextField';
 import { Button } from '../components/Button';
+import { AppText } from '../components/AppText';
 import { useTranslation } from '../i18n/useTranslation';
 import { colors } from '../theme/colors';
 import { useSessionStore } from '../state/useSessionStore';
-import { createGuestUser, signInWithEmail, signUpWithEmail } from '../services/authService';
+import { signInWithEmail, signUpWithEmail } from '../services/authService';
 import { isFirebaseConfigured } from '../services/firebase';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'EmailAuth'>;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function LoginScreen(_props: Props) {
+export function EmailAuthScreen(_props: Props) {
   const { t } = useTranslation();
   const setUser = useSessionStore((s) => s.setUser);
 
@@ -54,15 +55,13 @@ export function LoginScreen(_props: Props) {
     }
   }
 
-  function handleGuest() {
-    setUser(createGuestUser());
-  }
-
   return (
     <Screen scroll>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('login.title')}</Text>
-        <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
+        <AppText weight="bold" style={styles.title}>
+          {t('login.title')}
+        </AppText>
+        <AppText style={styles.subtitle}>{t('login.subtitle')}</AppText>
       </View>
 
       <TextField
@@ -90,29 +89,25 @@ export function LoginScreen(_props: Props) {
         style={styles.primaryAction}
       />
 
-      <Text style={styles.toggle} onPress={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')}>
+      <AppText
+        weight="semiBold"
+        style={styles.toggle}
+        onPress={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')}
+      >
         {mode === 'signIn' ? t('login.toggleToSignUp') : t('login.toggleToSignIn')}
-      </Text>
-
-      <View style={styles.dividerRow}>
-        <View style={styles.divider} />
-        <Text style={styles.dividerLabel}>{t('login.or')}</Text>
-        <View style={styles.divider} />
-      </View>
-
-      <Button label={t('login.guest')} onPress={handleGuest} variant="outline" />
+      </AppText>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    marginTop: 40,
+    marginTop: 16,
     marginBottom: 32,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 24,
     color: colors.text,
     textAlign: 'center',
   },
@@ -129,22 +124,5 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textAlign: 'center',
     marginTop: 16,
-    fontWeight: '600',
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-    gap: 12,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerLabel: {
-    color: colors.textMuted,
-    fontSize: 12,
-    fontWeight: '600',
   },
 });

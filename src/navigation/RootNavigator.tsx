@@ -3,10 +3,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import { useSessionStore } from '../state/useSessionStore';
-import { useTranslation } from '../i18n/useTranslation';
 import { colors } from '../theme/colors';
+import { BrandHeader } from '../components/BrandHeader';
+import { HeaderMenuButton, HeaderProfileButton } from '../components/HeaderButtons';
 
-import { LoginScreen } from '../screens/LoginScreen';
+import { WelcomeScreen } from '../screens/WelcomeScreen';
+import { EmailAuthScreen } from '../screens/EmailAuthScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { GatheringListScreen } from '../screens/family/GatheringListScreen';
@@ -19,7 +21,6 @@ import { FriendsBalancesScreen } from '../screens/friends/FriendsBalancesScreen'
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { t } = useTranslation();
   const user = useSessionStore((s) => s.user);
 
   return (
@@ -28,42 +29,36 @@ export function RootNavigator() {
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
-          headerTitleStyle: { fontWeight: '700' },
           headerShadowVisible: false,
+          headerTitle: () => <BrandHeader />,
+          headerTitleAlign: 'center',
+          headerRight: () => <HeaderProfileButton />,
+          contentStyle: { backgroundColor: colors.background },
         }}
       >
         {!user ? (
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <>
+            <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+            <Stack.Screen
+              name="EmailAuth"
+              component={EmailAuthScreen}
+              options={{ headerTitle: '', headerRight: () => null }}
+            />
+          </>
         ) : (
           <>
-            <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: t('settings.title') }} />
             <Stack.Screen
-              name="GatheringList"
-              component={GatheringListScreen}
-              options={{ title: t('gatherings.title') }}
+              name="Home"
+              component={HomeScreen}
+              options={{ headerLeft: () => <HeaderMenuButton /> }}
             />
-            <Stack.Screen
-              name="FamilyList"
-              component={FamilyListScreen}
-              options={({ route }) => ({ title: route.params.gatheringName })}
-            />
-            <Stack.Screen
-              name="FamilyResults"
-              component={FamilyResultsScreen}
-              options={{ title: t('family.resultsTitle') }}
-            />
-            <Stack.Screen name="TripList" component={TripListScreen} options={{ title: t('trips.title') }} />
-            <Stack.Screen
-              name="FriendsGroup"
-              component={FriendsGroupScreen}
-              options={({ route }) => ({ title: route.params.tripName })}
-            />
-            <Stack.Screen
-              name="FriendsBalances"
-              component={FriendsBalancesScreen}
-              options={{ title: t('balances.title') }}
-            />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="GatheringList" component={GatheringListScreen} />
+            <Stack.Screen name="FamilyList" component={FamilyListScreen} />
+            <Stack.Screen name="FamilyResults" component={FamilyResultsScreen} />
+            <Stack.Screen name="TripList" component={TripListScreen} />
+            <Stack.Screen name="FriendsGroup" component={FriendsGroupScreen} />
+            <Stack.Screen name="FriendsBalances" component={FriendsBalancesScreen} />
           </>
         )}
       </Stack.Navigator>

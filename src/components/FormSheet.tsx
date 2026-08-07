@@ -1,7 +1,9 @@
 import React, { PropsWithChildren } from 'react';
-import { Modal, Platform, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme/colors';
+import { radii } from '../theme/typography';
+import { AppText } from './AppText';
 import { Button } from './Button';
 import { ScrollView, KeyboardAvoidingView } from 'react-native';
 
@@ -31,7 +33,9 @@ export function FormSheet({
         <SafeAreaView style={styles.sheet} edges={['bottom']}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
-              <Text style={styles.title}>{title}</Text>
+              <AppText weight="bold" style={styles.title}>
+                {title}
+              </AppText>
               {children}
               <View style={styles.actions}>
                 <Button label={cancelLabel} onPress={onCancel} variant="outline" style={styles.actionButton} />
@@ -53,21 +57,20 @@ export function FormSheet({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 33, 0.4)',
+    backgroundColor: 'rgba(16, 27, 32, 0.45)',
     justifyContent: 'flex-end',
   },
   sheet: {
     backgroundColor: colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
     maxHeight: '90%',
   },
   scrollContent: {
     padding: 20,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 19,
     color: colors.text,
     marginBottom: 16,
   },

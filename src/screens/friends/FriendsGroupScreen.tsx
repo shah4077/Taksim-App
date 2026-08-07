@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
 import { Screen } from '../../components/Screen';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
+import { TextLinkButton } from '../../components/TextLinkButton';
 import { TextField } from '../../components/TextField';
 import { FormSheet } from '../../components/FormSheet';
 import { EmptyState } from '../../components/EmptyState';
+import { PageTitle } from '../../components/PageTitle';
+import { AppText } from '../../components/AppText';
 import { useTranslation } from '../../i18n/useTranslation';
 import { colors } from '../../theme/colors';
+import { radii } from '../../theme/typography';
 import {
   useFriendsStore,
   EMPTY_FRIENDS,
@@ -25,7 +29,7 @@ import { formatMoney } from '../../utils/format';
 type Props = NativeStackScreenProps<RootStackParamList, 'FriendsGroup'>;
 
 export function FriendsGroupScreen({ navigation, route }: Props) {
-  const { tripId } = route.params;
+  const { tripId, tripName } = route.params;
   const { t } = useTranslation();
   const currency = useSessionStore((s) => s.currency);
   const friends = useFriendsStore((s) => s.friendsByTrip[tripId] ?? EMPTY_FRIENDS);
@@ -188,27 +192,35 @@ export function FriendsGroupScreen({ navigation, route }: Props) {
 
   return (
     <Screen>
-      <Text style={styles.sectionTitle}>{t('friends.participants')}</Text>
+      <PageTitle title={tripName} />
+
+      <AppText weight="bold" style={styles.sectionTitle}>
+        {t('friends.participants')}
+      </AppText>
       <FlatList
         horizontal
         data={friends}
         keyExtractor={(item) => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.friendsRow}
-        ListEmptyComponent={<Text style={styles.emptyInline}>{t('friends.emptyFriends')}</Text>}
+        ListEmptyComponent={<AppText style={styles.emptyInline}>{t('friends.emptyFriends')}</AppText>}
         renderItem={({ item }) => (
           <View style={styles.friendChip}>
-            <Text style={styles.friendChipText}>{item.name}</Text>
+            <AppText weight="semiBold" style={styles.friendChipText}>
+              {item.name}
+            </AppText>
             <Pressable onPress={() => handleRemoveFriend(item)} hitSlop={8}>
               <Ionicons name="close-circle" size={18} color={colors.textMuted} />
             </Pressable>
           </View>
         )}
       />
-      <Button label={t('friends.addFriend')} onPress={openAddFriend} variant="outline" style={styles.addFriendBtn} />
+      <TextLinkButton label={t('friends.addFriend')} onPress={openAddFriend} style={styles.addFriendBtn} />
 
       <View style={styles.expensesHeader}>
-        <Text style={styles.sectionTitle}>{t('friends.expenses')}</Text>
+        <AppText weight="bold" style={styles.sectionTitle}>
+          {t('friends.expenses')}
+        </AppText>
         <Pressable onPress={openAddExpense} hitSlop={8}>
           <Ionicons name="add-circle" size={28} color={colors.primary} />
         </Pressable>
@@ -224,12 +236,17 @@ export function FriendsGroupScreen({ navigation, route }: Props) {
             <Card style={styles.expenseCard}>
               <View style={styles.expenseRow}>
                 <View style={styles.flex1}>
-                  <Text style={styles.expenseDesc}>{item.description}</Text>
-                  <Text style={styles.expenseMeta}>
-                    {friendNameById(item.paidById)} · {item.participantIds.length} {t('expense.splitBetween').toLowerCase()}
-                  </Text>
+                  <AppText weight="bold" style={styles.expenseDesc}>
+                    {item.description}
+                  </AppText>
+                  <AppText style={styles.expenseMeta}>
+                    {friendNameById(item.paidById)} · {item.participantIds.length}{' '}
+                    {t('expense.splitBetween').toLowerCase()}
+                  </AppText>
                 </View>
-                <Text style={styles.expenseAmount}>{formatMoney(item.amount, currency)}</Text>
+                <AppText weight="bold" style={styles.expenseAmount}>
+                  {formatMoney(item.amount, currency)}
+                </AppText>
                 <Pressable onPress={() => handleRemoveExpense(item)} hitSlop={10} style={styles.deleteIcon}>
                   <Ionicons name="trash-outline" size={20} color={colors.danger} />
                 </Pressable>
@@ -277,10 +294,14 @@ export function FriendsGroupScreen({ navigation, route }: Props) {
           value={amount}
           onChangeText={setAmount}
           keyboardType="decimal-pad"
+          prefix={currency}
+          placeholder="0.00"
           error={expenseErrors.amount}
         />
 
-        <Text style={styles.fieldLabel}>{t('expense.paidBy')}</Text>
+        <AppText weight="semiBold" style={styles.fieldLabel}>
+          {t('expense.paidBy')}
+        </AppText>
         <View style={styles.chipsWrap}>
           {friends.map((f) => (
             <Pressable
@@ -288,14 +309,16 @@ export function FriendsGroupScreen({ navigation, route }: Props) {
               style={[styles.selectChip, paidById === f.id && styles.selectChipActive]}
               onPress={() => setPaidById(f.id)}
             >
-              <Text style={[styles.selectChipText, paidById === f.id && styles.selectChipTextActive]}>
+              <AppText weight="semiBold" style={[styles.selectChipText, paidById === f.id && styles.selectChipTextActive]}>
                 {f.name}
-              </Text>
+              </AppText>
             </Pressable>
           ))}
         </View>
 
-        <Text style={styles.fieldLabel}>{t('expense.splitBetween')}</Text>
+        <AppText weight="semiBold" style={styles.fieldLabel}>
+          {t('expense.splitBetween')}
+        </AppText>
         <View style={styles.chipsWrap}>
           {friends.map((f) => (
             <Pressable
@@ -303,32 +326,37 @@ export function FriendsGroupScreen({ navigation, route }: Props) {
               style={[styles.selectChip, participantIds.includes(f.id) && styles.selectChipActive]}
               onPress={() => toggleParticipant(f.id)}
             >
-              <Text
+              <AppText
+                weight="semiBold"
                 style={[styles.selectChipText, participantIds.includes(f.id) && styles.selectChipTextActive]}
               >
                 {f.name}
-              </Text>
+              </AppText>
             </Pressable>
           ))}
         </View>
-        {expenseErrors.participants ? <Text style={styles.errorText}>{expenseErrors.participants}</Text> : null}
+        {expenseErrors.participants ? (
+          <AppText weight="medium" style={styles.errorText}>
+            {expenseErrors.participants}
+          </AppText>
+        ) : null}
 
         <View style={styles.chipsWrap}>
           <Pressable
             style={[styles.toggleChip, splitType === 'equal' && styles.selectChipActive]}
             onPress={() => setSplitType('equal')}
           >
-            <Text style={[styles.selectChipText, splitType === 'equal' && styles.selectChipTextActive]}>
+            <AppText weight="semiBold" style={[styles.selectChipText, splitType === 'equal' && styles.selectChipTextActive]}>
               {t('expense.splitEqually')}
-            </Text>
+            </AppText>
           </Pressable>
           <Pressable
             style={[styles.toggleChip, splitType === 'custom' && styles.selectChipActive]}
             onPress={() => setSplitType('custom')}
           >
-            <Text style={[styles.selectChipText, splitType === 'custom' && styles.selectChipTextActive]}>
+            <AppText weight="semiBold" style={[styles.selectChipText, splitType === 'custom' && styles.selectChipTextActive]}>
               {t('expense.splitCustom')}
-            </Text>
+            </AppText>
           </Pressable>
         </View>
 
@@ -342,7 +370,11 @@ export function FriendsGroupScreen({ navigation, route }: Props) {
               keyboardType="decimal-pad"
             />
           ))}
-        {expenseErrors.custom ? <Text style={styles.errorText}>{expenseErrors.custom}</Text> : null}
+        {expenseErrors.custom ? (
+          <AppText weight="medium" style={styles.errorText}>
+            {expenseErrors.custom}
+          </AppText>
+        ) : null}
       </FormSheet>
     </Screen>
   );
@@ -351,9 +383,9 @@ export function FriendsGroupScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
-    fontWeight: '700',
     color: colors.textMuted,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 10,
   },
   friendsRow: {
@@ -364,14 +396,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primaryLight,
-    borderRadius: 20,
+    borderRadius: radii.pill,
     paddingVertical: 8,
     paddingHorizontal: 12,
     gap: 6,
   },
   friendChipText: {
     color: colors.primaryDark,
-    fontWeight: '600',
   },
   emptyInline: {
     color: colors.textMuted,
@@ -397,7 +428,6 @@ const styles = StyleSheet.create({
   flex1: { flex: 1 },
   expenseDesc: {
     fontSize: 15,
-    fontWeight: '700',
     color: colors.text,
   },
   expenseMeta: {
@@ -407,7 +437,6 @@ const styles = StyleSheet.create({
   },
   expenseAmount: {
     fontSize: 15,
-    fontWeight: '700',
     color: colors.primary,
     marginEnd: 8,
   },
@@ -422,7 +451,6 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 14,
-    fontWeight: '600',
     color: colors.text,
     marginBottom: 8,
     marginTop: 4,
@@ -436,7 +464,7 @@ const styles = StyleSheet.create({
   selectChip: {
     paddingVertical: 8,
     paddingHorizontal: 14,
-    borderRadius: 18,
+    borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
@@ -444,7 +472,7 @@ const styles = StyleSheet.create({
   toggleChip: {
     paddingVertical: 8,
     paddingHorizontal: 14,
-    borderRadius: 18,
+    borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
@@ -455,7 +483,6 @@ const styles = StyleSheet.create({
   },
   selectChipText: {
     color: colors.text,
-    fontWeight: '600',
     fontSize: 13,
   },
   selectChipTextActive: {

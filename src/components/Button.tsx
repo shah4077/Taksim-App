@@ -1,6 +1,9 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, ViewStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { AppText } from './AppText';
 import { colors } from '../theme/colors';
+import { radii } from '../theme/typography';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'danger';
 
@@ -10,11 +13,13 @@ interface ButtonProps {
   variant?: Variant;
   disabled?: boolean;
   loading?: boolean;
+  icon?: keyof typeof Ionicons.glyphMap;
   style?: ViewStyle;
 }
 
-export function Button({ label, onPress, variant = 'primary', disabled, loading, style }: ButtonProps) {
+export function Button({ label, onPress, variant = 'primary', disabled, loading, icon, style }: ButtonProps) {
   const isDisabled = disabled || loading;
+  const iconColor = variant === 'outline' ? colors.text : '#FFFFFF';
 
   return (
     <Pressable
@@ -29,9 +34,14 @@ export function Button({ label, onPress, variant = 'primary', disabled, loading,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? colors.primary : '#FFFFFF'} />
+        <ActivityIndicator color={iconColor} />
       ) : (
-        <Text style={[styles.label, variant === 'outline' && styles.outlineLabel]}>{label}</Text>
+        <>
+          {icon ? <Ionicons name={icon} size={18} color={iconColor} style={styles.icon} /> : null}
+          <AppText weight="semiBold" style={[styles.label, variant === 'outline' && styles.outlineLabel]}>
+            {label}
+          </AppText>
+        </>
       )}
     </Pressable>
   );
@@ -39,12 +49,13 @@ export function Button({ label, onPress, variant = 'primary', disabled, loading,
 
 const styles = StyleSheet.create({
   base: {
+    flexDirection: 'row',
     paddingVertical: 14,
     paddingHorizontal: 20,
-    borderRadius: 14,
+    borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 50,
+    minHeight: 52,
   },
   pressed: {
     opacity: 0.85,
@@ -52,19 +63,21 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
+  icon: {
+    marginEnd: 8,
+  },
   label: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
   },
   outlineLabel: {
-    color: colors.primary,
+    color: colors.text,
   },
 });
 
 const variantStyles: Record<Variant, ViewStyle> = {
   primary: { backgroundColor: colors.primary },
   secondary: { backgroundColor: colors.secondary },
-  outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.primary },
+  outline: { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.border },
   danger: { backgroundColor: colors.danger },
 };

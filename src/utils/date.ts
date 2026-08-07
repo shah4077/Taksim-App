@@ -30,3 +30,16 @@ export function formatDateRange(
   }
   return formatDateDisplay((startKey ?? endKey) as string, language);
 }
+
+export type DateStatus = 'past' | 'thisWeek' | 'upcoming' | 'planning';
+
+/** Purely presentational bucket derived from an existing date field — no new data. */
+export function getDateStatus(dateKey: string | undefined, referenceDate: Date = new Date()): DateStatus {
+  if (!dateKey) return 'planning';
+  const target = fromDateKey(dateKey);
+  const today = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
+  const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
+  if (diffDays < 0) return 'past';
+  if (diffDays <= 7) return 'thisWeek';
+  return 'upcoming';
+}

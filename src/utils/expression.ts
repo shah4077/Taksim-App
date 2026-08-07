@@ -23,6 +23,24 @@ export function evaluateExpression(input: string): number | null {
   }
 }
 
+/**
+ * Resolves a numeric field's raw text to a number, whether it's a plain
+ * amount ("150"), a trailing-"=" expression ("150+200="), or a bare
+ * expression typed without ever reaching the "=" key ("150+200") — many
+ * Android keyboards bury "=" behind an extra symbols page, so typing the
+ * expression and just tapping elsewhere or saving must still work.
+ */
+export function resolveAmount(input: string): number | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  const withoutTrailingEquals = trimmed.endsWith('=') ? trimmed.slice(0, -1) : trimmed;
+  const direct = Number(withoutTrailingEquals);
+  if (Number.isFinite(direct)) return direct;
+
+  return evaluateExpression(withoutTrailingEquals);
+}
+
 function tokenize(input: string): Token[] {
   const tokens: Token[] = [];
   let i = 0;
