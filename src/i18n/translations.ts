@@ -35,6 +35,12 @@ export const translations = {
       authFailed: 'Authentication failed. Please check your details and try again.',
       firebaseNotConfigured:
         'Email sign-in is not configured yet. Add your Firebase project credentials, or continue as a guest.',
+      forgotPassword: 'Forgot password?',
+      resetSending: 'Sending…',
+      resetSentTitle: 'Check your email',
+      resetSent:
+        "If an account exists for that address, we've sent a link to reset your password. Remember to check your spam folder.",
+      resetFailed: "Couldn't send the reset email. Please check your connection and try again.",
     },
     welcome: {
       tagline: 'Shared finances, harmonious connections.',
@@ -221,6 +227,12 @@ export const translations = {
       authFailed: 'فشلت عملية المصادقة. يرجى التحقق من البيانات والمحاولة مرة أخرى.',
       firebaseNotConfigured:
         'تسجيل الدخول بالبريد الإلكتروني غير مُفعّل بعد. أضف بيانات مشروع Firebase، أو تابع كضيف.',
+      forgotPassword: 'نسيت كلمة المرور؟',
+      resetSending: 'جارٍ الإرسال…',
+      resetSentTitle: 'تحقق من بريدك الإلكتروني',
+      resetSent:
+        'إذا كان هناك حساب مرتبط بهذا العنوان، فقد أرسلنا رابطاً لإعادة تعيين كلمة المرور. لا تنسَ التحقق من مجلد الرسائل غير المرغوب فيها.',
+      resetFailed: 'تعذّر إرسال رسالة إعادة التعيين. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
     },
     welcome: {
       tagline: 'مالية مشتركة، وعلاقات متناغمة.',

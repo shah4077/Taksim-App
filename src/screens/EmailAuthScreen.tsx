@@ -9,7 +9,7 @@ import { AppText } from '../components/AppText';
 import { useTranslation } from '../i18n/useTranslation';
 import { colors } from '../theme/colors';
 import { useSessionStore } from '../state/useSessionStore';
-import { signInWithEmail, signUpWithEmail } from '../services/authService';
+import { sendPasswordReset, signInWithEmail, signUpWithEmail } from '../services/authService';
 import { isFirebaseConfigured } from '../services/firebase';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EmailAuth'>;
@@ -24,7 +24,15 @@ export function EmailAuthScreen(_props: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  /** Resetting a password only needs the address, so the two flows validate different fields. */
+  function validateEmail(): boolean {
+    const ok = EMAIL_REGEX.test(email.trim());
+    setErrors((prev) => ({ ...prev, email: ok ? undefined : t('login.invalidEmail') }));
+    return ok;
+  }
 
   function validate(): boolean {
     const next: { email?: string; password?: string } = {};
@@ -55,6 +63,24 @@ export function EmailAuthScreen(_props: Props) {
     }
   }
 
+  async function handleForgotPassword() {
+    if (!isFirebaseConfigured) {
+      Alert.alert(t('common.error'), t('login.firebaseNotConfigured'));
+      return;
+    }
+    if (!validateEmail()) return;
+
+    setResetting(true);
+    try {
+      await sendPasswordReset(email.trim());
+      Alert.alert(t('login.resetSentTitle'), t('login.resetSent'));
+    } catch (e) {
+      Alert.alert(t('common.error'), t('login.resetFailed'));
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
     <Screen scroll>
       <View style={styles.header}>
@@ -81,6 +107,16 @@ export function EmailAuthScreen(_props: Props) {
         error={errors.password}
         placeholder="••••••••"
       />
+
+      {mode === 'signIn' ? (
+        <AppText
+          weight="medium"
+          style={[styles.forgot, resetting && styles.forgotDisabled]}
+          onPress={resetting ? undefined : handleForgotPassword}
+        >
+          {resetting ? t('login.resetSending') : t('login.forgotPassword')}
+        </AppText>
+      ) : null}
 
       <Button
         label={mode === 'signIn' ? t('login.signIn') : t('login.signUp')}
@@ -116,6 +152,16 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     marginTop: 8,
+  },
+  forgot: {
+    color: colors.primary,
+    fontSize: 13,
+    textAlign: 'right',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  forgotDisabled: {
+    opacity: 0.5,
   },
   primaryAction: {
     marginTop: 4,
