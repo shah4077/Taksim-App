@@ -3,7 +3,6 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
-import { GoogleIcon } from '../components/GoogleIcon';
 import { useTranslation } from '../i18n/useTranslation';
 import { useSessionStore } from '../state/useSessionStore';
 import { createGuestUser } from '../services/authService';
@@ -20,9 +19,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 const palette = {
   background: '#f4faff',
   primary: '#004c3c',
-  onSurface: '#0d1e25',
   onSurfaceVariant: '#3f4945',
-  outlineVariant: '#bec9c3',
   secondaryContainer: '#b4ebdf',
   primaryFixed: '#a4f2d8',
 };
@@ -41,10 +38,6 @@ function fontFor(language: 'en' | 'ar', weight: 'regular' | 'medium' | 'semiBold
 export function WelcomeScreen({ navigation }: Props) {
   const { t, language } = useTranslation();
   const setUser = useSessionStore((s) => s.setUser);
-
-  function handleGoogleSignIn() {
-    Alert.alert(t('common.error'), t('login.googleUnavailable'));
-  }
 
   function handleGuest() {
     setUser(createGuestUser());
@@ -71,19 +64,6 @@ export function WelcomeScreen({ navigation }: Props) {
         </View>
 
         <BlurView intensity={40} tint="light" style={styles.panel}>
-          <Pressable style={styles.googleButton} onPress={handleGoogleSignIn}>
-            <GoogleIcon size={20} />
-            <Text style={[styles.googleLabel, { fontFamily: fontFor(language, 'semiBold') }]}>
-              {t('login.google')}
-            </Text>
-          </Pressable>
-
-          <View style={styles.dividerRow}>
-            <View style={styles.divider} />
-            <Text style={[styles.dividerLabel, { fontFamily: fontFor(language, 'medium') }]}>{t('login.or')}</Text>
-            <View style={styles.divider} />
-          </View>
-
           <Pressable style={styles.guestButton} onPress={handleGuest}>
             <Text style={[styles.guestLabel, { fontFamily: fontFor(language, 'semiBold') }]}>
               {t('login.guest')}
@@ -180,45 +160,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.5)',
     overflow: 'hidden',
   },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: palette.outlineVariant,
-    borderRadius: 999,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-  },
-  googleLabel: {
-    fontSize: 14,
-    lineHeight: 20,
-    letterSpacing: 0.14,
-    color: palette.onSurface,
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginVertical: 16,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: palette.outlineVariant,
-  },
-  dividerLabel: {
-    fontSize: 12,
-    lineHeight: 16,
-    color: palette.onSurfaceVariant,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
   guestButton: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: palette.primary,
     borderRadius: 999,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -227,11 +172,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     letterSpacing: 0.14,
-    color: palette.primary,
+    color: '#FFFFFF',
   },
   emailLink: {
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 12,
     paddingVertical: 8,
   },
   emailLinkLabel: {

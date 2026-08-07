@@ -30,14 +30,11 @@ export const translations = {
       toggleToSignUp: "Don't have an account? Sign up",
       toggleToSignIn: 'Already have an account? Sign in',
       guest: 'Continue as Guest',
-      or: 'OR',
       invalidEmail: 'Please enter a valid email address.',
       invalidPassword: 'Password must be at least 6 characters.',
       authFailed: 'Authentication failed. Please check your details and try again.',
       firebaseNotConfigured:
         'Email sign-in is not configured yet. Add your Firebase project credentials, or continue as a guest.',
-      google: 'Continue with Google',
-      googleUnavailable: 'Google sign-in is not configured yet. Continue as a guest, or use email instead.',
     },
     welcome: {
       tagline: 'Shared finances, harmonious connections.',
@@ -219,14 +216,11 @@ export const translations = {
       toggleToSignUp: 'ليس لديك حساب؟ أنشئ واحداً',
       toggleToSignIn: 'لديك حساب بالفعل؟ سجّل الدخول',
       guest: 'المتابعة كضيف',
-      or: 'أو',
       invalidEmail: 'يرجى إدخال بريد إلكتروني صحيح.',
       invalidPassword: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.',
       authFailed: 'فشلت عملية المصادقة. يرجى التحقق من البيانات والمحاولة مرة أخرى.',
       firebaseNotConfigured:
         'تسجيل الدخول بالبريد الإلكتروني غير مُفعّل بعد. أضف بيانات مشروع Firebase، أو تابع كضيف.',
-      google: 'المتابعة عبر جوجل',
-      googleUnavailable: 'تسجيل الدخول عبر جوجل غير مُفعّل بعد. تابع كضيف، أو استخدم البريد الإلكتروني.',
     },
     welcome: {
       tagline: 'مالية مشتركة، وعلاقات متناغمة.',
